@@ -42,7 +42,7 @@ console.log(storeData);
 
 
 
-        var queryUrlBase = "http://api.openweathermap.org/data/2.5/weather?&appid=338c0f586b9c50338b849da24ff79609&units=imperial";
+        var queryUrlBase = "https://api.openweathermap.org/data/2.5/weather?&appid=338c0f586b9c50338b849da24ff79609&units=imperial";
 
         var queryFiveDays = "https://api.openweathermap.org/data/2.5/forecast?&Appid=338c0f586b9c50338b849da24ff79609&units=imperial";
 
@@ -50,6 +50,9 @@ console.log(storeData);
         var newUrlDaily = queryUrlBase + "&q=" + searchItem;
         var newUrlForecast = queryFiveDays + "&q=" + searchItem;
         // keyCount = 0;
+        if(searchItem==""){
+            return
+        }
         $.ajax({
             url: newUrlDaily,
             method: "GET"
@@ -112,6 +115,8 @@ console.log(storeData);
         }).then(function (forecast) {
             console.log(forecast);
             //var days=[0,8,16,24,32];
+
+            
             for (i = 0; i < forecast.list.length; i++) {
                 if (forecast.list[i].dt_txt.indexOf("18:00:00") !== -1) {
                     console.log(forecast.list[i].dt);
@@ -126,7 +131,7 @@ console.log(storeData);
                     console.log(realfiveDate);
                     
                     var forecastcard = $(".cardfirst");
-                    //  forecastcard.empty();
+                     //forecastcard.empty();
                     forecastcard.append("<div class=fiveDayColor>" + "<p>" + realfiveDate + "</p>" + `<img src="https://openweathermap.org/img/wn/${forecast.list[i].weather[0].icon}@2x.png">` + "<p>" + "Temperature: " + forecast.list[i].main.temp + "</p>" + "<p>" + "Humidity: " + forecast.list[i].main.humidity + "%" + "</p>" + "</div>")
                 }
 
