@@ -1,76 +1,73 @@
 $(document).ready(function () {
 
-    // for (var i = 0; i < localStorage.length; i++) {
-    //     var city = localStorage.getItem(i);
-    // }
-//     init();
-//     function init(){
-         var storeData=JSON.parse(localStorage.getItem("key"));
-         
-console.log(storeData);
-//     }
-// function renterbutton(){
+    //making array for the list of city
+    var nameOfCity = [];
+    console.log(nameOfCity);
 
-//     for (var i=0;i<localStorage.length;i++){
-//         var nameCity=localStorage.getItem(data.name[i]);
-//         console.log(nameCity);
-//         var city=$(".card");
-//         // var a=$("<button>");
-//         // a.
-//         city.append("<button>"+nameCity+"</button>");
-//     }
-    
-// }
-// for (var i=0;i<localStorage.length;i++){
-//     var nameCity=localStorage.getItem(i);
-//     var city=$(".card");
-//     city.append("<p>"+nameCity+"</p>");
-// }
+    //making list of the city below search input,when enter in search field
+    function renderlist() {
+
+        var city = $("#newCity");
+        city.empty();
+        for (var i = 0; i < nameOfCity.length; i++) {
+            var ulist = $("<ul>");
+
+            ulist.addClass("list-group");
+            ulist.attr("cityList", nameOfCity[i]);
+            ulist.text(nameOfCity[i]);
+            $("#newCity").append(ulist);
+        }
+    }
+    //for local storage : showing last data when resfreshing,
+    var storeData = JSON.parse(localStorage.getItem("key"));
+    var localcity = $("#newCity");
+    localcity.append("<ul>" + storeData + "</ul>");
 
 
 
+
+
+    //click function;
 
     $("#run-search").on("click", function (event) {
 
         event.preventDefault();
-        var searchItem="";
-        
+        var searchItem = "";
+
+
         // alert("i am clicked");
+        //capturing input field
         searchItem = $("#pwd").val().trim();
+        //pushing search input into array
+        nameOfCity.push(searchItem);
+        //calling the renderlist which shows the list of search item.
+        renderlist();
         console.log(searchItem);
-        // searchItem=localStorage;
 
 
 
+        //query for daily weather
         var queryUrlBase = "https://api.openweathermap.org/data/2.5/weather?&appid=338c0f586b9c50338b849da24ff79609&units=imperial";
-
+        //base query for five days forecast
         var queryFiveDays = "https://api.openweathermap.org/data/2.5/forecast?&Appid=338c0f586b9c50338b849da24ff79609&units=imperial";
 
 
         var newUrlDaily = queryUrlBase + "&q=" + searchItem;
         var newUrlForecast = queryFiveDays + "&q=" + searchItem;
-        // keyCount = 0;
-        if(searchItem==""){
-            return
-        }
+        //ajax calling for daily weather
         $.ajax({
             url: newUrlDaily,
             method: "GET"
         }).then(function (data) {
-            var cityList = $("#newCity").append("<div>")
-            cityList.append("<h5>"+data.name+"</h5>");
-            cityList.text(data.name);
-
-             localStorage.setItem("key",JSON.stringify(data.name));
-
-            // keyCount = keyCount + 1;//
-            
-            //for current weather
+            //storing data name: city name from the response: this is used for storing the data
+            var citystoreName = localStorage.setItem("key", JSON.stringify(data.name));
+            //appending the result from the calling ajax.
             var weathercard = $("#rowFirst").append("<div>");
+            //before calling it should be empty
             weathercard.empty();
 
             var weatherName = weathercard.append("<p>");
-            // for date
+            // converting ut time for date and time
             var sec = data.dt;
             var date = new Date(sec * 1000);
             var newTime = date.toLocaleTimeString();
@@ -79,7 +76,7 @@ console.log(storeData);
             weatherName.append("<p>" + "Temperature: " + data.main.temp + "</p>");
             weatherName.append("<P>" + "Humidity: " + data.main.humidity + "</p>");
             weatherName.append("<p>" + "wind Speed: " + data.wind.speed + "</p>");
-
+            ///calling ajax for uv index:
             //uv index url
             var uvURLBase = "https://api.openweathermap.org/data/2.5/uvi?"//
             var apiKey = "338c0f586b9c50338b849da24ff79609";
@@ -108,15 +105,18 @@ console.log(storeData);
 
 
         })
+        //now on next ajax function , calling for 5 days forecast to display
         //start call for forecast
         $.ajax({
             url: newUrlForecast,
             method: "GET"
         }).then(function (forecast) {
             console.log(forecast);
-            //var days=[0,8,16,24,32];
+            //var days=[0,8,16,24,32];//first i was trying to lope through this array.coz, we get 40 data from the ajax,in the interval of 3 hrs
 
-            
+            var forecastcard = $(".cardfirst");
+            forecastcard.empty();
+
             for (i = 0; i < forecast.list.length; i++) {
                 if (forecast.list[i].dt_txt.indexOf("18:00:00") !== -1) {
                     console.log(forecast.list[i].dt);
@@ -125,23 +125,24 @@ console.log(storeData);
                     console.log(forecast.list[i].main.humidity);
 
 
-                    var utfiveday=new Date(forecast.list[i].dt*1000);
-                    // console.log("five day date"+utfiveday);
+                    var utfiveday = new Date(forecast.list[i].dt * 1000);
+
                     var realfiveDate = utfiveday.toLocaleDateString();
                     console.log(realfiveDate);
-                    
+
                     var forecastcard = $(".cardfirst");
-                     //forecastcard.empty();
+
                     forecastcard.append("<div class=fiveDayColor>" + "<p>" + realfiveDate + "</p>" + `<img src="https://openweathermap.org/img/wn/${forecast.list[i].weather[0].icon}@2x.png">` + "<p>" + "Temperature: " + forecast.list[i].main.temp + "</p>" + "<p>" + "Humidity: " + forecast.list[i].main.humidity + "%" + "</p>" + "</div>")
+
+
                 }
+
 
             }
 
         });
-
-        // renterbutton();
-
-
+       
+        $("#pwd").val("");//nothing will be in search item
 
 
     });
